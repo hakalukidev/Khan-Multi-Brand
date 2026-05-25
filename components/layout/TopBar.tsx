@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Menu, Phone, Settings, X } from 'lucide-react';
+import { Home, Menu, Package, Phone, Settings, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { FaFacebook, FaLinkedin, FaTwitter, FaYoutube } from 'react-icons/fa';
@@ -17,17 +17,20 @@ export default function TopBar() {
       {/* Desktop TopBar - Hidden on mobile */}
       <div className="bg-blue-600 text-white text-sm py-2 px-4 hidden md:block">
         <div className="container mx-auto flex justify-between items-center">
-          <p className="font-medium text-xs lg:text-sm">
+          <p className="font-bold text-xs lg:text-sm">
             Comprehensive Solutions for Every Workshop Need.
           </p>
           <div className="flex items-center gap-4 lg:gap-6">
-            <Link href="/" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm">
+            <Link href="/" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm font-semibold">
               <Home size={14} /> START HERE
             </Link>
-            <Link href="/about" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm">
+            <Link href="/about" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm font-semibold">
               <Settings size={14} /> ABOUT SERVICE
             </Link>
-            <Link href="/contact" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm">
+            <Link href="/products" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm font-semibold">
+              <Package size={14} /> PRODUCTS
+            </Link>
+            <Link href="/contact" className="flex items-center gap-1 hover:text-blue-200 transition text-xs lg:text-sm font-semibold">
               <Phone size={14} /> CONTACT US
             </Link>
             <div className="flex items-center gap-2 lg:gap-3 border-l border-blue-400 pl-3 lg:pl-4">
@@ -43,7 +46,7 @@ export default function TopBar() {
       {/* Mobile TopBar - Visible on mobile only */}
       <div className="bg-blue-600 text-white md:hidden">
         <div className="flex justify-between items-center py-2 px-4">
-          <p className="font-medium text-xs">
+          <p className="font-bold text-xs">
             Solutions for Every Workshop
           </p>
           <button 
@@ -61,21 +64,28 @@ export default function TopBar() {
             <div className="px-4 py-2 space-y-1">
               <Link 
                 href="/" 
-                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm"
+                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm font-semibold"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Home size={16} /> START HERE
               </Link>
               <Link 
                 href="/about" 
-                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm"
+                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm font-semibold"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Settings size={16} /> ABOUT SERVICE
               </Link>
               <Link 
+                href="/products" 
+                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm font-semibold"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Package size={16} /> PRODUCTS
+              </Link>
+              <Link 
                 href="/contact" 
-                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm"
+                className="flex items-center gap-2 py-2 px-2 hover:bg-blue-700 rounded transition text-sm font-semibold"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Phone size={16} /> CONTACT US
