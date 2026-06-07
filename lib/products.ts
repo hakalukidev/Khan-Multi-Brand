@@ -101,3 +101,20 @@ export function sortProducts(products: Product[]) {
     return rightValue - leftValue;
   });
 }
+
+export function getProductCategories(products: Product[]) {
+  const seen = new Set<string>();
+
+  return products.reduce<string[]>((categories, product) => {
+    const category = product.category.trim();
+
+    if (!category || seen.has(category)) {
+      return categories;
+    }
+
+    seen.add(category);
+    categories.push(category);
+
+    return categories;
+  }, []);
+}

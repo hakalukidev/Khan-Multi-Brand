@@ -3,19 +3,28 @@
 import { ChevronDown, ChevronRight, Menu, Search, Settings, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { PRODUCT_CATEGORIES } from "@/lib/products";
+import ProductSearchBox from "@/components/layout/ProductSearchBox";
+import { useCategoriesQuery } from "@/hooks/use-categories-query";
+import { useProductsQuery } from "@/hooks/use-products-query";
+import { getProductCategories } from "@/lib/products";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  // [NEW] State to control Browse Categories dropdown visibility
   const [isBrowseCategoriesOpen, setIsBrowseCategoriesOpen] = useState(false);
-  // [NEW] Ref to detect clicks outside the dropdown
   const browseDropdownRef = useRef<HTMLDivElement>(null);
+  const { data: products = [] } = useProductsQuery();
+  const { data: managedCategories = [] } = useCategoriesQuery();
+  const categoryOptions = useMemo(
+    () =>
+      managedCategories.length > 0
+        ? managedCategories.map((category) => category.name)
+        : getProductCategories(products),
+    [managedCategories, products]
+  );
 
-  // [NEW] Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (browseDropdownRef.current && !browseDropdownRef.current.contains(event.target as Node)) {
@@ -51,14 +60,8 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Garage Equipments Dropdown */}
-          <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded text-sm font-semibold text-gray-700 transition whitespace-nowrap">
-            <Settings size={15} className="text-blue-600" />
-            GARAGE EQUIPMENT&apos;S
-            <ChevronDown size={13} />
-          </button>
+        
 
-          {/* [NEW] Browse Categories Dropdown - Desktop */}
           <div className="relative" ref={browseDropdownRef}>
             <button
               onClick={() => setIsBrowseCategoriesOpen(!isBrowseCategoriesOpen)}
@@ -66,34 +69,28 @@ export default function Navbar() {
             >
               <Menu size={15} />
               BROWSE IN CATEGORIES
-              {/* [NEW] Chevron rotates when dropdown is open */}
               <ChevronDown size={13} className={`transition-transform ${isBrowseCategoriesOpen ? "rotate-180" : ""}`} />
             </button>
 
-            {/* [NEW] Dropdown Menu - shows when isBrowseCategoriesOpen is true */}
             {isBrowseCategoriesOpen && (
               <div className="absolute left-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                {/* Dropdown header */}
                 <div className="px-3 py-2 border-b border-gray-100">
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Shop by Category
                   </h3>
                 </div>
-                {/* Category list */}
                 <ul className="py-1">
-                  {/* All Products link */}
                   <li>
                     <Link
                       href="/products"
                       className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                       onClick={() => setIsBrowseCategoriesOpen(false)}
                     >
-                      <span>📦 All Products</span>
+                      <span>All Products</span>
                       <ChevronRight size={14} />
                     </Link>
                   </li>
-                  {/* Dynamic categories from PRODUCT_CATEGORIES array */}
-                  {PRODUCT_CATEGORIES.map((category) => (
+                  {categoryOptions.map((category) => (
                     <li key={category}>
                       <Link
                         href={`/products?category=${encodeURIComponent(category)}`}
@@ -109,16 +106,8 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Search */}
-          <div className="flex items-center border border-gray-300 rounded overflow-hidden w-72">
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="flex-1 px-3 py-2 text-sm outline-none"
-            />
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2">
-              <Search size={15} />
-            </button>
+          <div className="w-72">
+            <ProductSearchBox products={products} />
           </div>
         </div>
 
@@ -164,17 +153,10 @@ export default function Navbar() {
         {/* Mobile Search Bar */}
         {isSearchOpen && (
           <div className="lg:hidden mt-3">
-            <div className="flex items-center border border-gray-300 rounded overflow-hidden">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="flex-1 px-3 py-2 text-sm outline-none"
-                autoFocus
-              />
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2">
-                <Search size={16} />
-              </button>
-            </div>
+            <ProductSearchBox
+              products={products}
+              onNavigate={() => setIsSearchOpen(false)}
+            />
           </div>
         )}
 
@@ -190,7 +172,6 @@ export default function Navbar() {
               <ChevronDown size={14} />
             </button>
 
-            {/* [NEW] Browse Categories - Mobile Dropdown */}
             <div>
               <button
                 onClick={() => setIsBrowseCategoriesOpen(!isBrowseCategoriesOpen)}
@@ -200,11 +181,9 @@ export default function Navbar() {
                   <Menu size={16} />
                   BROWSE IN CATEGORIES
                 </span>
-                {/* [NEW] Chevron rotates when dropdown is open */}
                 <ChevronDown size={14} className={`transition-transform ${isBrowseCategoriesOpen ? "rotate-180" : ""}`} />
               </button>
 
-              {/* [NEW] Mobile dropdown menu */}
               {isBrowseCategoriesOpen && (
                 <div className="mt-2 ml-4 space-y-1 border-l-2 border-blue-200 pl-3">
                   <Link
@@ -215,9 +194,9 @@ export default function Navbar() {
                       setIsMenuOpen(false);
                     }}
                   >
-                    📦 All Products
+                    All Products
                   </Link>
-                  {PRODUCT_CATEGORIES.map((category) => (
+                  {categoryOptions.map((category) => (
                     <Link
                       key={category}
                       href={`/products?category=${encodeURIComponent(category)}`}
@@ -263,6 +242,13 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
+              </Link>
+              <Link
+                href="/blog"
+                className="block py-2 text-sm text-gray-600 hover:text-blue-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
               </Link>
             </div>
           </div>

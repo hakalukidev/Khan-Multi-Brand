@@ -1,8 +1,17 @@
 import ProductCatalogClient from "@/components/products/ProductCatalogClient";
+import { getAllCategories } from "@/lib/category-service";
 import { getCachedProducts } from "@/lib/product-cache";
 
 export default async function ProductsPage() {
-  const initialProducts = await getCachedProducts();
+  const [initialCategories, initialProducts] = await Promise.all([
+    getAllCategories(),
+    getCachedProducts(),
+  ]);
 
-  return <ProductCatalogClient initialProducts={initialProducts} />;
+  return (
+    <ProductCatalogClient
+      initialCategories={initialCategories}
+      initialProducts={initialProducts}
+    />
+  );
 }

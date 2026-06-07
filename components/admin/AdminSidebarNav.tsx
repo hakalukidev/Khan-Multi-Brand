@@ -14,11 +14,6 @@ const navigationItems = [
     icon: LayoutDashboard,
   },
   {
-    href: "/admin/products/new",
-    label: "Add Product",
-    icon: PackagePlus,
-  },
-  {
     href: "/admin/blog",
     label: "Blog Posts",
     icon: FileText,

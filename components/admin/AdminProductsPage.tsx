@@ -35,8 +35,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCategoriesQuery } from "@/hooks/use-categories-query";
 import { useProductsQuery } from "@/hooks/use-products-query";
 import { toast } from "@/hooks/use-toast";
+import {
+  findManagedMainCategory,
+  getManagedCategoryOptions,
+  matchesManagedCategoryValue,
+  type Category,
+} from "@/lib/categories";
 import { deleteManagedProductImage } from "@/lib/product-image-service";
 import { resolveProductPhotoPublicId } from "@/lib/product-images";
 import { productsQueryKey } from "@/lib/product-query";
@@ -45,7 +52,6 @@ import {
   updateProduct,
 } from "@/lib/product-service";
 import {
-  PRODUCT_CATEGORIES,
   type Product,
   type ProductInput,
 } from "@/lib/products";
@@ -96,13 +102,19 @@ function getCleanupDescription(
 }
 
 type AdminProductsPageProps = {
+  initialCategories?: Category[];
   initialProducts?: Product[];
 };
 
 export default function AdminProductsPage({
+  initialCategories,
   initialProducts,
 }: AdminProductsPageProps) {
   const queryClient = useQueryClient();
+  const {
+    data: managedCategories = [],
+    isPending: isLoadingCategories,
+  } = useCategoriesQuery(initialCategories);
   const {
     data: products = [],
     error,
@@ -113,6 +125,10 @@ export default function AdminProductsPage({
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
   const deferredSearchTerm = useDeferredValue(searchTerm);
+  const categoryOptions = useMemo(
+    () => getManagedCategoryOptions(managedCategories),
+    [managedCategories]
+  );
 
   useEffect(() => {
     if (!error) {
@@ -126,16 +142,34 @@ export default function AdminProductsPage({
     });
   }, [error]);
 
-  const categories = useMemo(() => {
-    const dynamicCategories = products
-      .map((product) => product.category)
-      .filter(Boolean);
+  const categoryFilters = useMemo(() => {
+    const seen = new Set<string>();
+    const options = ["all"];
 
-    return ["all", ...new Set([...PRODUCT_CATEGORIES, ...dynamicCategories])];
-  }, [products]);
+    for (const value of [
+      ...categoryOptions.map((option) => option.value),
+      ...products.map((product) => product.category),
+    ]) {
+      const normalizedValue = value.trim();
+      const normalizedKey = normalizedValue.toLowerCase();
+
+      if (!normalizedValue || seen.has(normalizedKey)) {
+        continue;
+      }
+
+      seen.add(normalizedKey);
+      options.push(normalizedValue);
+    }
+
+    return options;
+  }, [categoryOptions, products]);
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = deferredSearchTerm.trim().toLowerCase();
+    const selectedManagedMainCategory =
+      selectedCategory === "all"
+        ? null
+        : findManagedMainCategory(selectedCategory, managedCategories);
 
     return products.filter((product) => {
       const matchesSearch =
@@ -144,11 +178,14 @@ export default function AdminProductsPage({
         product.category.toLowerCase().includes(normalizedSearch) ||
         product.price.toLowerCase().includes(normalizedSearch);
       const matchesCategory =
-        selectedCategory === "all" || product.category === selectedCategory;
+        selectedCategory === "all" ||
+        (selectedManagedMainCategory
+          ? matchesManagedCategoryValue(product.category, selectedManagedMainCategory)
+          : product.category === selectedCategory);
 
       return matchesSearch && matchesCategory;
     });
-  }, [deferredSearchTerm, products, selectedCategory]);
+  }, [deferredSearchTerm, managedCategories, products, selectedCategory]);
 
   async function handleDelete(product: Product) {
     const confirmed = window.confirm(
@@ -350,7 +387,7 @@ export default function AdminProductsPage({
                 onChange={(event) => setSelectedCategory(event.target.value)}
                 className="flex h-10 min-w-[220px] rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-blue-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
-                {categories.map((category) => (
+                {categoryFilters.map((category) => (
                   <option key={category} value={category}>
                     {category === "all" ? "All categories" : category}
                   </option>
@@ -499,6 +536,8 @@ export default function AdminProductsPage({
           </DialogHeader>
           {editingProduct ? (
             <ProductForm
+              categoriesLoading={isLoadingCategories}
+              categoryOptions={categoryOptions}
               key={editingProduct.id}
               defaultValues={toProductFormValues(editingProduct)}
               layout="dialog"

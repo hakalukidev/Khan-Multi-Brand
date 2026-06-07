@@ -17,8 +17,7 @@ export default function HeroSlider() {
   const next = () => setCurrent((p) => (p + 1) % slides.length);
 
   return (
-    <div className="flex gap-0" style={{ minHeight: 480 }}>
-      {/* Slider */}
+    <div style={{ minHeight: 480 }}>
       <div className="relative flex-1 overflow-hidden" style={{ minHeight: 480 }}>
         {slides.map((slide, i) => (
           <div
@@ -81,32 +80,6 @@ export default function HeroSlider() {
               />
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* Right panels */}
-      <div className="w-72 shrink-0 flex flex-col">
-        <div className="flex-1 bg-gray-100 p-5 flex flex-col justify-between overflow-hidden">
-          <div>
-            <h3 className="text-blue-600 font-bold text-base mb-1">Our Services</h3>
-            <p className="text-gray-600 text-sm">Discover all the ways to get your product.</p>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=400&q=80"
-            alt="Our Services"
-            className="w-full h-28 object-cover rounded mt-3"
-          />
-        </div>
-        <div className="flex-1 bg-gray-50 p-5 flex flex-col justify-between overflow-hidden border-t border-gray-200">
-          <div>
-            <h3 className="text-blue-600 font-bold text-base mb-1">Free Shipping!</h3>
-            <p className="text-gray-600 text-sm">Empowering Workshops Across Bangladesh.</p>
-          </div>
-          <img
-            src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=400&q=80"
-            alt="Free Shipping"
-            className="w-full h-28 object-cover rounded mt-3"
-          />
         </div>
       </div>
     </div>

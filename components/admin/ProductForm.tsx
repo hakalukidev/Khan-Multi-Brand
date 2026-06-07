@@ -23,7 +23,11 @@ import {
   extractCloudinaryPublicId,
   resolveProductPhotoPublicId,
 } from "@/lib/product-images";
-import { PRODUCT_CATEGORIES, type Product, type ProductInput } from "@/lib/products";
+import {
+  getCategoryKey,
+  type ManagedCategoryOption,
+} from "@/lib/categories";
+import { type Product, type ProductInput } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
 export const productFormSchema = z.object({
@@ -42,7 +46,7 @@ export type ProductFormValues = z.infer<typeof productFormSchema>;
 
 export const emptyProductFormValues: ProductFormValues = {
   name: "",
-  category: PRODUCT_CATEGORIES[0],
+  category: "",
   price: "Contact for Price",
   description: "",
   details: "",
@@ -55,7 +59,7 @@ export const emptyProductFormValues: ProductFormValues = {
 export function toProductFormValues(product: Product): ProductFormValues {
   return {
     name: product.name,
-    category: product.category || PRODUCT_CATEGORIES[0],
+    category: product.category || "",
     price: product.price,
     description: product.description,
     details: product.details,
@@ -84,6 +88,8 @@ export function toProductInput(values: ProductFormValues): ProductInput {
 }
 
 type ProductFormProps = {
+  categoriesLoading?: boolean;
+  categoryOptions?: ManagedCategoryOption[];
   defaultValues?: ProductFormValues;
   layout?: "page" | "dialog";
   onSubmit: (values: ProductFormValues) => Promise<void>;
@@ -93,6 +99,8 @@ type ProductFormProps = {
 };
 
 export default function ProductForm({
+  categoriesLoading = false,
+  categoryOptions = [],
   defaultValues = emptyProductFormValues,
   layout = "page",
   onSubmit,
@@ -108,6 +116,7 @@ export default function ProductForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const previewUrl = form.watch("photoUrl");
   const previewName = form.watch("name");
+  const selectedCategory = form.watch("category");
   const photoPublicIdField = form.register("photoPublicId");
   const uploadedImagesRef = useRef(
     new Map<string, { photoUrl: string; photoPublicId: string }>()
@@ -131,6 +140,44 @@ export default function ProductForm({
       });
     };
   }, []);
+
+  useEffect(() => {
+    if (form.getValues("category").trim() || categoryOptions.length === 0) {
+      return;
+    }
+
+    form.setValue("category", categoryOptions[0].value, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: false,
+    });
+  }, [categoryOptions, form]);
+
+  const resolvedCategoryOptions = (() => {
+    const currentCategory = selectedCategory.trim();
+
+    if (!currentCategory) {
+      return categoryOptions;
+    }
+
+    const currentCategoryKey = getCategoryKey(currentCategory);
+
+    if (
+      categoryOptions.some((option) => getCategoryKey(option.value) === currentCategoryKey)
+    ) {
+      return categoryOptions;
+    }
+
+    return [
+      {
+        label: `${currentCategory} (current value)`,
+        parentName: null,
+        type: "main" as const,
+        value: currentCategory,
+      },
+      ...categoryOptions,
+    ];
+  })();
 
   function rememberUploadedImage(image: { photoUrl: string; photoPublicId: string }) {
     if (!image.photoPublicId.trim()) {
@@ -291,15 +338,31 @@ export default function ProductForm({
                   <FormControl>
                     <select
                       className="flex h-10 w-full rounded-md border border-blue-200 bg-white px-3 py-2 text-sm text-blue-900 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      disabled={categoriesLoading && resolvedCategoryOptions.length === 0}
                       {...field}
                     >
-                      {PRODUCT_CATEGORIES.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
+                      <option value="" disabled>
+                        {categoriesLoading
+                          ? "Loading categories..."
+                          : resolvedCategoryOptions.length > 0
+                            ? "Select a category"
+                            : "Add a category first"}
+                      </option>
+                      {resolvedCategoryOptions.map((categoryOption) => (
+                        <option
+                          key={`${categoryOption.type}:${categoryOption.value}`}
+                          value={categoryOption.value}
+                        >
+                          {categoryOption.label}
                         </option>
                       ))}
                     </select>
                   </FormControl>
+                  <p className="text-sm text-blue-500">
+                    {resolvedCategoryOptions.length > 0
+                      ? "Main categories and subcategories come from the Categories admin page."
+                      : "Create a category group first, then return here to assign products."}
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

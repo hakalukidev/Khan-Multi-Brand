@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 import ProductForm, {
   emptyProductFormValues,
@@ -12,14 +13,33 @@ import ProductForm, {
 } from "@/components/admin/ProductForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCategoriesQuery } from "@/hooks/use-categories-query";
 import { toast } from "@/hooks/use-toast";
+import {
+  getManagedCategoryOptions,
+  type Category,
+} from "@/lib/categories";
 import { productsQueryKey } from "@/lib/product-query";
 import { createProduct } from "@/lib/product-service";
 import { revalidateProductsCache } from "@/lib/revalidate-products-cache";
 
-export default function AdminCreateProductPage() {
+type AdminCreateProductPageProps = {
+  initialCategories?: Category[];
+};
+
+export default function AdminCreateProductPage({
+  initialCategories,
+}: AdminCreateProductPageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const {
+    data: categories = [],
+    isPending: isLoadingCategories,
+  } = useCategoriesQuery(initialCategories);
+  const categoryOptions = useMemo(
+    () => getManagedCategoryOptions(categories),
+    [categories]
+  );
 
   async function handleCreate(values: typeof emptyProductFormValues) {
     try {
@@ -61,6 +81,8 @@ export default function AdminCreateProductPage() {
         </CardHeader>
         <CardContent>
           <ProductForm
+            categoriesLoading={isLoadingCategories}
+            categoryOptions={categoryOptions}
             defaultValues={emptyProductFormValues}
             layout="page"
             submitLabel="Save Product"

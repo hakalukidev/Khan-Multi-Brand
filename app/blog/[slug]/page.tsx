@@ -1,4 +1,5 @@
 import { db } from '@/lib/firebase';
+import { normalizeBlogPost } from '@/lib/blog-type';
 import { doc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import Link from 'next/link';
@@ -13,28 +14,16 @@ async function getBlogPost(id: string) {
     const docRef = doc(db, 'blog', id);
     const snapshot = await getDoc(docRef);
     if (!snapshot.exists()) return null;
-    const data = snapshot.data();
-    return {
-      id: snapshot.id,
-      title: data.title || '',
-      subtitle: data.subtitle || '',
-      content: data.content || '',
-      imageUrl: data.imageUrl || '',
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: data.updatedAt || new Date().toISOString(),
-      published: data.published || false,
-    };
-    if (!snapshot.exists()) return null;
-    return { id: snapshot.id, ...snapshot.data() };
+    return normalizeBlogPost(snapshot.id, snapshot.data());
   } catch (error) {
     return null;
   }
 }
 
-export default async function BlogPostPage({ params }: { params: { id: string } }) {
-  const post = await getBlogPost(params.id);
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await getBlogPost(params.slug);
   
-  if (!post) {
+  if (!post || !post.published) {
     notFound();
   }
 
@@ -61,9 +50,13 @@ export default async function BlogPostPage({ params }: { params: { id: string } 
         </div>
 
         <div className="prose prose-lg max-w-none">
-          {post.content.split('\n').map((paragraph: string, idx: number) => (
-            <p key={idx} className="text-gray-700 leading-relaxed mb-4">{paragraph}</p>
-          ))}
+          {post.content
+            .split('\n')
+            .map((paragraph: string) => paragraph.trim())
+            .filter(Boolean)
+            .map((paragraph: string, idx: number) => (
+              <p key={idx} className="text-gray-700 leading-relaxed mb-4">{paragraph}</p>
+            ))}
         </div>
       </article>
     </main>
