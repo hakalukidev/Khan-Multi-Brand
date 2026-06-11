@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import ProductPhoto from "@/components/products/ProductPhoto";
-import { type Product } from "@/lib/products";
 import { getAllProducts, getProductById } from "@/lib/product-service";
+import { type Product } from "@/lib/products";
 
 type ProductDetailClientProps = {
   productId: string;
@@ -116,22 +116,31 @@ export default function ProductDetailClient({
               </div>
 
               <div className="border-y border-gray-200 py-3 md:py-4">
-                <p className="leading-relaxed text-gray-700">
-                  {product.details || product.description}
+                <p className="whitespace-normal break-words break-all leading-relaxed text-gray-700">
+                  <p className="mb-2 font-medium text-gray-800">Description:</p>
+                  <div className="text-sm md:text-base">
+                    {(product.details || product.description || "" ).split('\n').map((paragraph, idx) => (
+                      <p key={idx} className="mb-2 last:mb-0">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                 </p>
               </div>
 
               {product.keyHighlights.length > 0 ? (
                 <div className="space-y-2">
                   <h3 className="font-semibold text-gray-800">Key Highlights</h3>
-                  <ul className="space-y-1 text-sm text-gray-600">
+                  <div className="flex flex-wrap gap-2">
                     {product.keyHighlights.map((highlight) => (
-                      <li key={highlight} className="flex items-center gap-2">
-                        <CheckCircle size={16} className="text-green-500" />
+                      <span 
+                        key={highlight} 
+                        className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-sm text-blue-700">
+                        <CheckCircle size={16} className="text-blue-600" />
                         {highlight}
-                      </li>
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               ) : null}
 
