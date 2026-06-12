@@ -62,35 +62,18 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              {/* Phone - Updated with 4 numbers */}
+              {/* Phone - Combined format */}
               <div className="flex gap-4 items-start">
                 <div className="bg-white/20 p-3 rounded-lg flex-shrink-0">
                   <Phone size={22} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Phone Numbers</h3>
-                  <div className="space-y-1 text-blue-100 text-sm">
-                    <p>
-                      <a href="tel:+8801897914480" className="hover:underline">
-                        +88 01897914480
-                      </a>
-                    </p>
-                    <p>
-                      <a href="tel:+8801897914481" className="hover:underline">
-                        +88 01897914481
-                      </a>
-                    </p>
-                    <p>
-                      <a href="tel:+8801897914482" className="hover:underline">
-                        +88 01897914482
-                      </a>
-                    </p>
-                    <p>
-                      <a href="tel:+8801897914483" className="hover:underline">
-                        +88 01897914483
-                      </a>
-                    </p>
-                  </div>
+                  <p className="text-blue-100 text-sm">
+                    <a href="tel:+8801897914480" className="hover:underline">
+                      +88 01897914480-83
+                    </a>
+                  </p>
                 </div>
               </div>
 
@@ -170,7 +153,7 @@ export default function ContactPage() {
                   <FaYoutube size={22} />
                 </a>
                 <a
-                  href="https://instagram.com/muaztechnology"
+                  href="https://www.instagram.com/techmuaz/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-white/20 hover:bg-white/30 p-3 rounded-lg transition duration-300 transform hover:scale-110"

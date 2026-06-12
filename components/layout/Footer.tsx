@@ -30,7 +30,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info - Updated with 4 numbers */}
+          {/* Contact Info - Combined phone number format */}
           <div className="text-center sm:text-left">
             <h3 className="text-lg md:text-xl font-bold mb-3 md:mb-4">Contact Info</h3>
             <div className="space-y-2">
@@ -40,19 +40,7 @@ export default function Footer() {
               </p>
               <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-2">
                 <Phone size={14} className="shrink-0" />
-                <span>+88 01897914480</span>
-              </p>
-              <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-2">
-                <Phone size={14} className="shrink-0" />
-                <span>+88 01897914481</span>
-              </p>
-              <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-2">
-                <Phone size={14} className="shrink-0" />
-                <span>+88 01897914482</span>
-              </p>
-              <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-2">
-                <Phone size={14} className="shrink-0" />
-                <span>+88 01897914483</span>
+                <span>+88 01897914480-83</span>
               </p>
               <p className="text-gray-400 text-sm flex items-center justify-center sm:justify-start gap-2">
                 <Mail size={14} className="shrink-0" />
